@@ -1,0 +1,40 @@
+provider "google" {
+  credentials = "${file("application_default_credentials.json")}"
+  project = "{{sense-docker}}"
+  region  = "{{southamerica-east1}}"
+  zone    = "{{southamerica-east1-b}}"
+
+}
+
+
+resource "google_monitoring_uptime_check_config" "https" {
+  display_name = "https-uptime-check"
+  timeout = "60s"
+
+
+  http_check {
+    path         = "/"
+    port         = "443"
+    use_ssl      = true
+    validate_ssl = true
+    request_method = "GET"
+  }
+
+
+  monitored_resource {
+    type = "uptime_url"
+    labels = {
+      project_id = "sense-docker"
+      host       = "{{demo2.sensedata.io}}"
+    }
+  }
+
+}
+
+resource "google_monitoring_notification_channel" "canal" {
+  display_name = "Test Slack Channel"
+  type         = "slack"
+  labels = {
+    "channel_name" = "#alertas_infra"
+  }
+}
